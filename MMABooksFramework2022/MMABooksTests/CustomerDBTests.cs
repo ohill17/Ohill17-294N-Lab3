@@ -28,10 +28,32 @@ namespace MMABooksTests
         public void TestRetrieve()
         {
             CustomerProps p = (CustomerProps)db.Retrieve(1);
-            Assert.AreEqual("1", p.CustomerID);
-            Assert.AreEqual("Find In Database - Use SQL", p.Name);
+            Assert.AreEqual(1, p.CustomerID);
+            Assert.AreEqual("Molunguri, A", p.Name);
+        }
+        [Test]
+        public void TestUpdate()
+        {
+            CustomerProps p = (CustomerProps)db.Retrieve(150);
+            p.Name = "Molunguri, A";
+            Assert.True(db.Update(p));
+            p = (CustomerProps)db.Retrieve(150);
+            Assert.AreEqual("Molunguri, A", p.Name);
+        }
+
+        [Test]
+        public void TestDelete()
+        {
+            CustomerDB db = new CustomerDB(); 
+            CustomerProps customerToDelete = new CustomerProps
+            {
+                CustomerID = 6969,  
+                Name = "Molunguri, A" 
+            };
+            bool deletionResult = db.Delete(customerToDelete);
+            Assert.True(deletionResult, "Customer deletion should be successful.");
+
         }
 
     }
-
 }

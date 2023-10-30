@@ -91,7 +91,7 @@ namespace MMABooksTests
         {
             StateProps p = new StateProps();
             p.Code = "OR";
-            p.Name = "Oregon";
+            p.Name = "Ore";
             Assert.Throws<MySqlException>(() => db.Create(p));
         }
     }

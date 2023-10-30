@@ -21,18 +21,51 @@ namespace MMABooksDB
 {
     public class CustomerDB : DBBase, IReadDB, IWriteDB
     {
-        public IBaseProps Create(IBaseProps props)
+        /*public IBaseProps Create(IBaseProps props)
         {
             throw new NotImplementedException();
         }
-
-        public bool Delete(IBaseProps props)
+        */
+        public bool Delete(IBaseProps p)
         {
-            throw new NotImplementedException();
+            CustomerProps props = (CustomerProps)p;
+            int rowsAffected = 0;
+
+            DBCommand command = new DBCommand();
+            command.CommandText = "usp_CustomerDelete";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("custId", DBDbType.Int32);
+            command.Parameters.Add("name_p", DBDbType.VarChar);
+            command.Parameters["custId"].Value = props.CustomerID;
+            command.Parameters["name_p"].Value = props.Name;
+
+            try
+            {
+                rowsAffected = RunNonQueryProcedure(command);
+                if (rowsAffected == 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    string message = "Record cannot be deleted. It has been edited by another user.";
+                    throw new Exception(message);
+                }
+
+            }
+            catch (Exception e)
+            {
+                // log this exception
+                throw;
+            }
+            finally
+            {
+                if (mConnection.State == ConnectionState.Open)
+                    mConnection.Close();
+            }
         }
 
-        /*
-public IBaseProps Create(IBaseProps p)
+        public IBaseProps Create(IBaseProps p)
 {
    int rowsAffected = 0;
    CustomerProps props = (CustomerProps)p;
@@ -42,11 +75,8 @@ public IBaseProps Create(IBaseProps p)
    command.CommandType = CommandType.StoredProcedure;
    command.Parameters.Add("custId", DBDbType.Int32);
    command.Parameters.Add("name_p", DBDbType.VarChar);
-   ... there are more parameters here
    command.Parameters[0].Direction = ParameterDirection.Output;
    command.Parameters["name_p"].Value = props.Name;
-   ... and more values here
-
    try
    {
        rowsAffected = RunNonQueryProcedure(command);
@@ -70,7 +100,7 @@ public IBaseProps Create(IBaseProps p)
            mConnection.Close();
    }
 }
-*/
+
         public IBaseProps Retrieve(object key)
         {
             DBDataReader data = null;
@@ -115,9 +145,45 @@ public IBaseProps Create(IBaseProps p)
             throw new NotImplementedException();
         }
 
-        public bool Update(IBaseProps props)
+        public bool Update(IBaseProps p)
         {
-            throw new NotImplementedException();
+            int rowsAffected = 0;
+            CustomerProps props = (CustomerProps)p;
+
+            DBCommand command = new DBCommand();
+            command.CommandText = "usp_CustomerUpdate";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("custID", DBDbType.UInt32);
+            command.Parameters.Add("name_p", DBDbType.VarChar);
+            command.Parameters.Add("conCurrId", DBDbType.Int32);
+            command.Parameters["custID"].Value = props.CustomerID;
+            command.Parameters["name_p"].Value = props.Name;
+            command.Parameters["conCurrId"].Value = props.ConcurrencyID;
+
+            try
+            {
+                rowsAffected = RunNonQueryProcedure(command);
+                if (rowsAffected == 1)
+                {
+                    props.ConcurrencyID++;
+                    return true;
+                }
+                else
+                {
+                    string message = "Record cannot be updated. It has been edited by another user.";
+                    throw new Exception(message);
+                }
+            }
+            catch (Exception e)
+            {
+                // log this exception
+                throw;
+            }
+            finally
+            {
+                if (mConnection.State == ConnectionState.Open)
+                    mConnection.Close();
+            }
         }
     }
 }
